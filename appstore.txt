@@ -1,0 +1,114 @@
+The dataset for this project is available here https://www.kaggle.com/datasets/ramamet4/app-store-apple-data-set-10k-apps/?select=appleStore_description.csv
+
+
+---EXPLANATORY DATA ANALYSIS
+
+
+-- check the number of unique apps in both files and see whether it is equal
+Select Count(Distinct*)AS uniqueid
+From AppleStore
+
+Select Count(Distinct id) AS UNIQUEID
+From AppleStore_description
+
+--check if there is any missing VALUES in some important fields
+Select count(*) as missing_values
+From AppleStore
+Where prime_genre IS NULL or user_rating IS NULL or track_name IS NULL
+
+--check for the other dataset as well
+Select count(*) as missing_values
+From AppleStore_description
+Where size_bytes IS  NULL or track_name IS NULL
+
+--the number of apps in each genre
+SELECT count(*) As number_apps,prime_genre
+From AppleStore
+Group by prime_genre
+Order by number_apps Desc
+
+---overview of app ratings
+Select 
+          min(user_rating) as lowest_rating,
+		  max(user_rating) as highest_rating,
+		  avg(user_rating) as average_rating
+From AppleStore
+
+---check whether paid apps have better ratings
+Select  Case When price >0  Then 'Paid'
+           Else 'Free'
+		   End  As App_price,
+ avg(user_rating) as average_rating
+From AppleStore
+Group by App_price
+--check to see difference in user ratings based on the number of languages the app supports
+
+Select 
+         Case When lang_num<6 Then 'Few _Languages'
+		 When lang_num BETWEEN 6 and 20 Then '6-20 _Languages'
+		 Else '20 or more Languages'
+		 End As Supported_language,
+		 avg(user_rating) AS average_rating
+From AppleStore
+Group by Supported_language
+Order by average_rating Desc
+
+--we can see that those apps that have many different languages doesn't necessarily mean the apps have better acceptance among users. 
+--The app developers can focus more on other aspects of the app than the number of  language used
+
+---genre where there is opprtunity
+SELECT
+   prime_genre
+   ,avg(user_rating) as average_rating
+   
+From AppleStore
+Group by prime_genre
+Order by average_rating
+
+---Which groups have highest competition
+SELECT
+   prime_genre
+   ,avg(user_rating) as average_rating
+   
+From AppleStore
+Group by prime_genre
+Order by average_rating Desc
+--From the above we can see there is a lot opprtunity to develop apps in catalogs,books,finance categories as users are not satified with what is available to them right now
+
+--check if there is any relationship between description length of an app and user ratings
+
+SELECT
+  CASE WHEN b.app_desc <500  Then 'Short'
+             When b.app_desc BETWEEN 500 AND 800 Then 'Medium'
+             Else 'Long'
+			 End AS  Description_length
+	,avg(user_rating) AS average_rating
+From 
+   AppleStore AS a
+  Join AppleStore_description AS b
+  On a.id=b.id
+ Group by Description_length
+ Order by average_rating Desc
+ --no evidence to suggest there is any correlation between user satisfaction and the length of the description of an app
+
+--check the highest rated app for each genre group
+Select  
+   prime_genre
+  ,track_name
+  ,user_rating
+ From (
+     SELECT
+	 prime_genre
+    ,track_name
+    ,user_rating
+    ,RANK () OVER(PARTITION BY prime_genre ORDER by user_rating DESC,rating_count_tot Desc)  AS rank
+    FRom AppleStore) AS a
+ Where a.rank=1
+ 
+ ---Conclusion
+ --Paid apps have a higher user rating than free apps that could be due to users are more engaged with apps that they paid for.
+--It could be a good strategy to develop a good app and make it a paid one 
+--It is not the number of languages an app that supports most to users. It would be more wise to spend more time on other features of the AppleStore
+--There could be more opportunity in the market for apps in the genre 'books' and 'finance' as users here are very unsatified.
+--Productivity and music apps have the highest ratings so it could be a tough market for new app developers in this group 
+--So App developers in this group need to think about develop a very high quality app or not get involved at all.
