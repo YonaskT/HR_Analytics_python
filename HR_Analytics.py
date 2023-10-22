@@ -1,11 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 27 13:42:11 2023
-
-@author: yonastena
-"""
-
+#Import libraries
 # For data manipulation
 import numpy as np
 import pandas as pd
